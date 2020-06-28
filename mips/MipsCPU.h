@@ -17,7 +17,7 @@ private:
 public:
     MipsCPU();
 
-    void readMemory(); //会从binary_code.txt里面读指令,会把文本转成二进制
+    int readMemory(); //会从binary_code.txt里面读指令,会把文本转成二进制
     int runNext();     //单步运行
     void run();        //直接运行
 

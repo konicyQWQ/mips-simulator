@@ -12,9 +12,11 @@ MipsCPU::MipsCPU()
         Memory[VMaddr + i] = '.';
 }
 
-void MipsCPU::readMemory()
+int MipsCPU::readMemory()
 {
     ifstream in("binary_code.txt");
+    if(!in)
+        return 1;
     string ins;
     int ofs = 0;
     while (in.peek() != EOF)
@@ -33,6 +35,8 @@ void MipsCPU::readMemory()
     //0xFFFFFFFF代表结束
     Memory[ofs] = 0xFFFF;
     Memory[ofs + 1] = 0xFFFF;
+
+    return 0;
 }
 
 int MipsCPU::runNext()
