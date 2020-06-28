@@ -121,6 +121,62 @@ int MipsCPU::runNext()
         rgstr[31] = PC; //$ra=PC
         PC = (PC & 0xF8000000) + adr;
     }
+    else if (op == 12) //syscall
+    {
+        int v0 = rgstr[2];
+        if (v0 == 1)
+        {
+            //print_int
+            int i = (int)rgstr[4];
+            string s = to_string(i);
+            for (int j = 0; j < s.length(); ++j)
+                Memory[VMaddr + j] = s[j] - '0';
+        }
+        else if (v0 == 2)
+        {
+            //print_float
+            float f = (float)rgstr[4];
+            string s = to_string(f);
+            for (int j = 0; j < s.length(); ++j)
+                Memory[VMaddr + j] = s[j] - '0';
+        }
+        else if (v0 == 3)
+        {
+            //print_double
+            dwrd d = rgstr[4];
+            d <<= 32;
+            d += rgstr[4];
+            string s = to_string((double)d);
+            for (int j = 0; j < s.length(); ++j)
+                Memory[VMaddr + j] = s[j] - '0';
+        }
+        else if (v0 == 4)
+        {
+            //print_string
+        }
+        else if (v0 == 5)
+        {
+            //read_int
+        }
+        else if (v0 == 6)
+        {
+            //read_float
+        }
+        else if (v0 == 7)
+        {
+            //read_double
+        }
+        else if (v0 == 10)
+            exit(0);
+        else if (v0 == 11)
+        {
+            //print_char
+        }
+        else if (v0 == 12)
+        {
+            //read_char
+        }
+    }
 
     //输出显存内容
     cout << endl;
