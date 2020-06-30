@@ -12,6 +12,7 @@
 #include <fstream>
 #include <QDebug>
 #include <QLineEdit>
+#include "MipsCPU.h"
 #include <QInputDialog>
 using namespace std;
 
@@ -256,11 +257,13 @@ void mips::on_runOneLine_clicked()
 
 void mips::showVM() {
     zjie *vm = cpu.sendVM();
-    QString str;
-    for(int i=0; i<800; i++) {
-        str.push_back((QChar)vm[i]);
+    string str;
+    for(int i=0; i<HEIGHT; i++) {
+        for(int j=0; j<WIDTH; j++)
+            str += (char)vm[i * WIDTH + j];
+        str += '\n';
     }
-    ui->vmOutput->setPlainText(str);
+    ui->vmOutput->setPlainText(QString::fromStdString(str));
 }
 
 void mips::showREG() {

@@ -10,7 +10,7 @@ MipsCPU::MipsCPU()
     rgstr[0] = 0; //$zero
     PC = 0;
     for (int i = VMaddr; i < VMaddr + WIDTH * HEIGHT; ++i)
-        Memory[VMaddr + i] = '.';
+        Memory[i] = '.';
 }
 
 int MipsCPU::readMemory()
@@ -97,15 +97,16 @@ int MipsCPU::runNext()
                 int i = (int)rgstr[4];
                 string s = to_string(i);
                 for (int j = 0; j < s.length(); ++j)
-                    Memory[VMaddr + j] = s[j] - '0';
+                    Memory[VMaddr + j] = s[j];
             }
             else if (v0 == 2)
             {
                 //print_float
-                float f = (float)rgstr[4];
+                float f;
+                memcpy((char*)&f, (char*)&rgstr[4], 4);
                 string s = to_string(f);
                 for (int j = 0; j < s.length(); ++j)
-                    Memory[VMaddr + j] = s[j] - '0';
+                    Memory[VMaddr + j] = s[j];
             }
            /* else if (v0 == 3)
             {
@@ -120,10 +121,8 @@ int MipsCPU::runNext()
             else if (v0 == 4)
             {
                 //print_string
-                //$a0 is 32 bit which means it can only represent a string of length 4
-                //if we want to print a longer string, we need to invoke syscall repeatedly
-                for (int i = 3; i >= 0; --i)
-                    Memory[VMaddr + 3 - i] = (rgstr[4] >> (i * 8)) & 255;
+                for(int i=0; Memory[rgstr[4] + i] != 0;i++)
+                    Memory[VMaddr + i] = Memory[rgstr[4] + i] & 255;
             }
             else if (v0 == 5)
             {
@@ -146,9 +145,10 @@ int MipsCPU::runNext()
             else if(v0 == 8)
             {
                 QString str = mips::inputStringDialog("请输入字符串", "一个字符串");
+                string c = str.toStdString();
                 for(int i=0; i<rgstr[5]; i++)
-                    if(i < str.length())
-                        Memory[rgstr[4] + i] = str[i];
+                    if(i < c.length())
+                        Memory[rgstr[4] + i] = c[i];
                     else
                         Memory[rgstr[4] + i] = 0;
             }
@@ -162,8 +162,9 @@ int MipsCPU::runNext()
             }
             else if (v0 == 12)
             {
-                QString str = mips::inputStringDialog("请输入字符串", "一个字符串");
-                rgstr[4] = str[0];
+                QString str = mips::inputStringDialog("请输入字符", "一个字符");
+                string c = str.toStdString();
+                rgstr[4] = c[0];
             }
         }
     }
