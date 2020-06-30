@@ -28,7 +28,10 @@ SOURCES += \
     codeeditor.cpp \
     highlightcode.cpp \
     mips.cpp \
-    MipsCPU.cpp
+    MipsCPU.cpp \
+    Assemble.cpp \
+    Disassemble.cpp \
+    formula.cpp
 
 HEADERS += \
     codeeditor.h \
@@ -37,7 +40,10 @@ HEADERS += \
     mips.h \
     MipsCPU.h \
     Register.h \
-    typedef.h
+    typedef.h \
+    Assemble.h \
+    Disassemble.h \
+    formula.h
 
 FORMS += \
     mips.ui

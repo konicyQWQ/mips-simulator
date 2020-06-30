@@ -636,6 +636,18 @@ width: 50px;</string>
                </layout>
               </item>
               <item>
+               <widget class="QPlainTextEdit" name="PC">
+                <property name="styleSheet">
+                 <string notr="true">border: none;
+color: rgb(203, 204, 198);
+font: 12pt Consolas;</string>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
                <spacer name="verticalSpacer_2">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
@@ -654,7 +666,8 @@ width: 50px;</string>
              <widget class="QPlainTextEdit" name="memOutput">
               <property name="styleSheet">
                <string notr="true">border: none;
-color: white;</string>
+color: rgb(203, 204, 198);
+font: 12pt Consolas;</string>
               </property>
               <property name="verticalScrollBarPolicy">
                <enum>Qt::ScrollBarAlwaysOff</enum>

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "mips.h"
 
 using namespace std;
 MipsCPU::MipsCPU()
@@ -21,7 +22,9 @@ int MipsCPU::readMemory()
     int ofs = 0;
     while (in.peek() != EOF)
     {
-        in >> ins;
+        getline(in, ins);
+        if(ins.empty())
+            break;
         zjie hi = 0, lo = 0;
         for (int i = 0; i < 16; ++i)
         {
@@ -32,6 +35,9 @@ int MipsCPU::readMemory()
         Memory[ofs + 1] = lo;
         ofs += 2;
     }
+    for(int i=0; i<32; i++)
+        modifyRegister(i, 0);
+    PC = 0;
     //0xFFFFFFFF代表结束
     Memory[ofs] = 0xFFFF;
     Memory[ofs + 1] = 0xFFFF;
@@ -125,7 +131,7 @@ int MipsCPU::runNext()
         rgstr[31] = PC; //$ra=PC
         PC = (PC & 0xF8000000) + adr;
     }
-    else if (op == 12) //syscall
+    else if (op == 12) //syscalls
     {
         int v0 = rgstr[2];
         if (v0 == 1)
@@ -160,7 +166,7 @@ int MipsCPU::runNext()
         }
         else if (v0 == 5)
         {
-            //read_int
+            string str = mips::inputStringDialog("请输入整数", "一个整数");
         }
         else if (v0 == 6)
         {

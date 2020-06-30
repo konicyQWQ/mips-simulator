@@ -10,11 +10,12 @@
 class MipsCPU
 {
 private:
-    word PC;
     word rgstr[32]; //不知道为啥不让用register做变量名
     zjie Memory[MAXMEM];
 
 public:
+    word PC;
+
     MipsCPU();
 
     int readMemory(); //会从binary_code.txt里面读指令,会把文本转成二进制

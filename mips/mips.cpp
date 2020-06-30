@@ -7,6 +7,55 @@
 #include <QTextStream>
 #include "MipsCPU.h"
 #include "typedef.h"
+#include "Assemble.h"
+#include "Disassemble.h"
+#include <fstream>
+#include <QDebug>
+#include <QLineEdit>
+#include <QInputDialog>
+using namespace std;
+
+map<string, int> RegisterID = {
+        {"zero", 0},
+        {"at",   1},
+        {"v0",   2},
+        {"v1",   3},
+        {"a0",   4},
+        {"a1",   5},
+        {"a2",   6},
+        {"a3",   7},
+        {"t0",   8},
+        {"t1",   9},
+        {"t2",   10},
+        {"t3",   11},
+        {"t4",   12},
+        {"t5",   13},
+        {"t6",   14},
+        {"t7",   15},
+        {"s0",   16},
+        {"s1",   17},
+        {"s2",   18},
+        {"s3",   19},
+        {"s4",   20},
+        {"s5",   21},
+        {"s6",   22},
+        {"s7",   23},
+        {"t8",   24},
+        {"t9",   25},
+        {"k0",   26},
+        {"k1",   27},
+        {"gp",   28},
+        {"sp",   29},
+        {"fp",   30},
+        {"ra",   31}
+};
+
+string RegisterName[32] = {     /* NOLINT */
+        "zero", "at", "v0", "v1", "a0", "a1", "a2", "a3",
+        "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7",
+        "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7",
+        "t8", "t9", "k0", "k1", "gp", "sp", "fp", "ra",
+};
 
 mips::mips(QWidget *parent)
     : QWidget(parent)
@@ -23,7 +72,7 @@ mips::mips(QWidget *parent)
 
     // 初始化完成
     ui->consoleOutput->appendPlainText("初始化完成...");
-
+    ui->tabArea->setCurrentIndex(0);
     // 一输入就改变已保存状态为false
     connect(editor, CodeEditor::textChanged, this, mips::textChange);
 
@@ -57,6 +106,7 @@ void mips::on_newFile_clicked()
         editor->clear();
         ui->consoleOutput->appendPlainText("新建文件完成!");
     }
+    ui->tabArea->setCurrentIndex(0);
 }
 
 void mips::on_saveFile_clicked()
@@ -78,6 +128,7 @@ void mips::on_saveFile_clicked()
     this->saved = true;
 
     ui->consoleOutput->appendPlainText("保存文件成功!");
+    ui->tabArea->setCurrentIndex(0);
 }
 
 void mips::on_openFile_clicked()
@@ -97,21 +148,50 @@ void mips::on_openFile_clicked()
     this->saved = true;
     file.close();
     ui->consoleOutput->appendPlainText("打开文件成功!");
+    ui->tabArea->setCurrentIndex(0);
 }
 
 // ==============================编译代码==============================
 
 void mips::on_compile_clicked()
 {
+    ofstream binary_code("binary_code.txt", ios::trunc);
+    binary_code.close();
+    Assemble a;
+    string str = editor->toPlainText().toStdString() + '\n';
 
+
+
+    while (true)
+    {
+        int pos = str.find('\n');
+        if(pos == string::npos) {
+            break;
+        }
+        string s = str.substr(0, pos);
+        str = str.substr(pos+1);
+        a.addInstruction(s);
+    }
+    a.run();
+    ui->consoleOutput->appendPlainText("编译成功!");
+    ui->tabArea->setCurrentIndex(0);
 }
 
 // ==============================运行代码==============================
 
 void mips::on_run_clicked()
 {
+    if(editor->toPlainText() == "") {
+        this->ui->consoleOutput->appendPlainText("请先点击编译!");
+        ui->tabArea->setCurrentIndex(0);
+        return;
+    }
+    if(this->debugMode == true) {
+        this->debugMode = false;
+    }
     if(cpu.readMemory() != 0) {
         this->ui->consoleOutput->appendPlainText("请先点击编译!");
+        ui->tabArea->setCurrentIndex(0);
     } else {
         this->ui->consoleOutput->appendPlainText("运行开始!");
         cpu.run();
@@ -119,6 +199,7 @@ void mips::on_run_clicked()
         this->showREG();
         this->showMEM();
         this->ui->consoleOutput->appendPlainText("运行结束!");
+        ui->tabArea->setCurrentIndex(2);
     }
 }
 
@@ -135,6 +216,7 @@ void mips::on_debug_clicked()
         this->showVM();
         this->showMEM();
         this->debugMode = true; // 调试模式开始中
+        ui->tabArea->setCurrentIndex(1);
     }
 }
 
@@ -167,6 +249,7 @@ void mips::on_runOneLine_clicked()
     this->showREG();
     this->showMEM();
     this->showVM();
+    ui->tabArea->setCurrentIndex(1);
 }
 
 // ============================= 内部使用的函数 =========================
@@ -221,6 +304,18 @@ void mips::showMEM() {
         str += '\n';
     }
     ui->memOutput->setPlainText(str);
+
+    Disassemble d;
+    zjie a = cpu.sendMemory(cpu.PC);
+    zjie b = cpu.sendMemory(cpu.PC+1);
+
+    QString first = QString::number(a, 2); first = QString(16 - first.length(), '0') + first;
+    QString second = QString::number(b, 2); second = QString(16 - second.length(), '0') + second;
+    QString qs = first + second;
+    d.addInstruction(qs.toStdString());
+
+    std::string pcstr = std::string("PC: ") + QString::number(cpu.PC).toStdString() + "\n" + std::string("now instruction: ") + d.run();
+    ui->PC->setPlainText(QString::fromStdString(pcstr));
 }
 
 // ================== 内存修改 ==================
@@ -233,6 +328,7 @@ void mips::on_memchangeButton_clicked()
     zjie val = ui->memValue->text().toUInt(nullptr, 16);
     cpu.modifyMemory(id, val);
     this->showMEM();
+    this->showVM();
 }
 
 // =================== 内存跳转 ===================
@@ -244,4 +340,15 @@ void mips::on_memButton_clicked()
         return;
     this->memPos = pos;
     this->showMEM();
+}
+
+// ==================== 打开一个输入字符串的对话框 ===============
+string mips::inputStringDialog(QString title, QString label) {
+    QLineEdit::EchoMode echomode = QLineEdit::Normal;
+    bool ok = false;
+    QString text = QInputDialog::getText(nullptr, title, label, echomode, "", &ok);
+    if(ok && !text.isEmpty())
+        return text.toStdString();
+    else
+        return "0";
 }

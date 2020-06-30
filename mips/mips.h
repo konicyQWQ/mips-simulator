@@ -5,6 +5,8 @@
 #include <QFile>
 #include "codeeditor.h"
 #include "MipsCPU.h"
+#include <string>
+using namespace std;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class mips; }
@@ -24,6 +26,9 @@ public:
     void showREG();
     // 显示内存
     void showMEM();
+    // 打开一个输入框，提示用户输入
+    static string inputStringDialog(QString title, QString labels);
+
 
 private slots:
     void on_newFile_clicked(); // 按下新建文件

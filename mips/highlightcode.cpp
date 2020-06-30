@@ -13,7 +13,7 @@ HighlightCode::HighlightCode(QTextDocument *document) : QSyntaxHighlighter(docum
                              "\\bandi\\b|\\bor\\b|\\bori\\b|\\bxor\\b|\\bxori\\b|"
                              "\\bnor\\b|\\bnori\\b|\\bj\\b|\\bjr\\b|\\bjal\\b|"
                              "\\bjalr\\b|\\bbeq\\b|\\bbeqz\\b|\\bbenz\\b|\\bbne"
-                             "\\b|\\blui\\b|\\bsll\\b|\\bsrl\\b|\\bsyscall\\b");
+                             "\\b|\\blui\\b|\\bsll\\b|\\bsrl\\b|\\bsyscall\\b|\\bla\\b|\\bli\\b|\\binc\\b");
     // 注释
     commentFormat.setForeground(QColor(0x74, 0x7d, 0x8c));
     commentFormat.setFontItalic(true);
