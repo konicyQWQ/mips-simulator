@@ -8,8 +8,11 @@
 #include <algorithm>
 #include <map>
 #include <fstream>
+#include <sstream>
+#include <regex>
 #define CALC(s) calcFormula(s+"()")
 #define REG(s) "$" + getRegister(s)
+ValuableManager VM;
 
 string getRegister(string s)
 {
@@ -118,9 +121,22 @@ void Assemble::Relocation(vector<string> &ins)
 
 void Assemble::process_Instruction(string s)
 {
+    static bool parseVal = false;
+    if(s.find(".data") != string::npos){
+        parseVal = true;
+        return;
+    }
+    if(parseVal){
+        if(s.find(".text") != string::npos)
+            parseVal = false;
+        else
+            VM.parseValuableDef(s);
+        return;
+    }
     string op = s.substr(0, s.find_first_of(' '));
     s.erase(0, s.find_first_of(' '));
     s.erase(0, s.find_first_not_of(' '));
+    s = VM.parseVal(s);
     if (op == "add" || op == "addu" || op == "sub" || op == "subu" || op == "slt" || op == "sltu"
         || op == "mul"
         || op == "and" || op == "or" || op == "xor" || op == "nor"
@@ -569,4 +585,86 @@ void Assemble::process_J(const string &op, const string &s)
     binary_code << addr << endl;
 
     binary_code.close();
+}
+
+void ValuableManager::parseValuableDef(string s){
+    s.erase(0, s.find_first_not_of(' '));
+    string valName = s.substr(0, s.find_first_of(' '));
+    s.erase(0, s.find_first_of(' '));
+    s.erase(0, s.find_first_not_of(' '));
+    string valType = s.substr(0, s.find_first_of(' '));
+    s.erase(0, s.find_first_of(' '));
+    s.erase(0, s.find_first_not_of(' '));
+    Valuable* v = new Valuable();
+    stringstream ss;
+    v->name = valName;
+    if(valType == ".word"){
+        v->type = 0;
+        string val;
+        if(s.find_first_of('"') == string::npos){
+            string substr;
+            char c;
+            do{
+                substr = s.substr(0, s.find_first_of(','));
+                c = CALC(substr);
+                ss <<  c;
+                if(s.find_first_of(',') == string::npos)
+                    s = "";
+                else
+                    s.erase(0, s.find_first_of(',')+1);
+            }while(!s.empty());
+            ss >> val;
+        }else
+            val = s.substr(s.find_first_of('"')+1, s.find_last_of('"') - 1);
+        v->value_f = 0;
+        v->value_s = val;
+        v->size = val.length() + 1;
+        v->addr = addr;
+        addr += v->size;
+    }else{
+        ss << s;
+        v->type = 1;
+        float val;
+        ss >> val;
+        v->value_f = val;
+        v->value_s = to_string(val);
+        v->size = 2;
+        v->addr = addr;
+        addr += 2;
+    }
+    valuables.push_back(v);
+}
+
+ValuableManager::ValuableManager(): addr(ADDR_START){
+}
+
+ValuableManager::~ValuableManager(){
+    for(auto v: valuables)
+        delete v;
+    valuables.clear();
+}
+
+string ValuableManager::parseVal(string s){
+    vector<string> ss;
+    string substr, res = s;
+    replace(s.begin(), s.end(), ',', ' ');
+    replace(s.begin(), s.end(), '(', ' ');
+    replace(s.begin(), s.end(), ')', ' ');
+    do{
+        s.erase(0, s.find_first_not_of(' '));
+        substr = s.substr(0, s.find_first_of(' '));
+        ss.push_back(substr);
+        s.erase(0, s.find_first_of(' '));
+    }while(s.find_first_not_of(' ') != string::npos);
+    for(auto str: ss)
+        for(auto v: valuables)
+            if(v->name == str){
+                regex re("[,()\\s]?"+str+"[,()\\s]?");
+                res = regex_replace(res, re, to_string(v->addr));
+            }
+    return res;
+}
+
+vector<Valuable*> ValuableManager::getValuables(){
+    return valuables;
 }

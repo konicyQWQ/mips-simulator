@@ -7,11 +7,7 @@
 
 #include <vector>
 #include <string>
-
-#ifndef DEBUG
-#define DEBUG
 #include <iostream>
-#endif
 
 using namespace std;
 
@@ -45,6 +41,29 @@ public:
 
     void run();
 };
+
+
+struct Valuable{
+    string name;
+    int type; // 0: word, 1: float
+    string value_s; // float: to_string(float)
+    float value_f; // word: 0
+    int addr;
+    int size; // size in byte
+};
+
+class ValuableManager{
+    const int ADDR_START = 2048;
+    int addr;
+    vector<Valuable*> valuables;
+public:
+    ValuableManager();
+    ~ValuableManager();
+    void parseValuableDef(string s);
+    string parseVal(string s);
+    vector<Valuable*> getValuables();
+};
+
 
 
 #endif //ASSEMBLE_INTERPRETATION_ASSEMBLE_H
