@@ -6,7 +6,7 @@ HighlightCode::HighlightCode(QTextDocument *document) : QSyntaxHighlighter(docum
     // 关键字
     keywordFormat.setForeground(QColor(0xff, 0x7f, 0x50));
     keywordRegexp.setPattern("\\blb\\b|\\blh\\b|\\blw\\b|\\bsb\\b|\\bsh\\b|"
-                             "\\bsw\\b|\\bmov\\b|\\bmovz\\b|\\bmovn\\b|\\btrap\\b|"
+                             "\\bsw\\b|\\bmove\\b|\\bmovz\\b|\\bmovn\\b|\\btrap\\b|"
                              "\\beret\\b|\\badd\\b|\\baddu\\b|\\baddi\\b|\\baddiu\\b|"
                              "\\bsub\\b|\\bsubu\\b|\\bdiv\\b|\\bdivu\\b|\\bmul\\b|"
                              "\\bmulu\\b|\\bslt\\b|\\bslti\\b|\\bsltui\\b|\\band\\b|"

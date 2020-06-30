@@ -161,16 +161,22 @@ void mips::on_compile_clicked()
     Assemble a;
     string str = editor->toPlainText().toStdString() + '\n';
 
+    int pos1 = str.find(".data");
+    int pos2 = str.find(".text");
+    string variable = str.substr(pos1 + 5, pos2 - pos1 - 5);
+    string ins = str.substr(pos2 + 5);
 
+    qDebug() << QString::fromStdString(variable);
+    qDebug() << QString::fromStdString(ins);
 
     while (true)
     {
-        int pos = str.find('\n');
+        int pos = ins.find('\n');
         if(pos == string::npos) {
             break;
         }
-        string s = str.substr(0, pos);
-        str = str.substr(pos+1);
+        string s = ins.substr(0, pos);
+        ins = ins.substr(pos+1);
         a.addInstruction(s);
     }
     a.run();
@@ -183,7 +189,7 @@ void mips::on_compile_clicked()
 void mips::on_run_clicked()
 {
     if(editor->toPlainText() == "") {
-        this->ui->consoleOutput->appendPlainText("请先点击编译!");
+        this->ui->consoleOutput->appendPlainText("没有代码?");
         ui->tabArea->setCurrentIndex(0);
         return;
     }
@@ -208,7 +214,11 @@ void mips::on_run_clicked()
 
 void mips::on_debug_clicked()
 {
-    this->showREG();
+    if(editor->toPlainText() == "") {
+        this->ui->consoleOutput->appendPlainText("没有代码?");
+        ui->tabArea->setCurrentIndex(0);
+        return;
+    }
     if(cpu.readMemory() != 0) {
         this->ui->consoleOutput->appendPlainText("请先点击编译!");
     } else {

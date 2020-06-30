@@ -7,7 +7,7 @@
 const int LINE_NUMBER_WIDTH = 50; // 行号的行高定义，行号的样式在codeeditor.cpp里面
 const QString CODE_EDITOR_STYLE = "background: rgb(35, 40, 52);"
                                   "color: rgb(203, 204, 198);"
-                                  "font: 12pt Consolas;"
+                                  "font: 12pt consolas;"
                                   "border: 1px solid #2d3436;"; // 样式
 
 class CodeEditor : public QPlainTextEdit
