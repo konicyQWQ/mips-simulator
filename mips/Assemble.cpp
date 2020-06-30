@@ -447,7 +447,7 @@ void Assemble::process_R0(const string &op)
 
     binary_code.close();
 }
-#include <iostream>
+
 void Assemble::process_I2(const string &op, string s)
 {
     ofstream binary_code("binary_code.txt", ios::app);
@@ -646,22 +646,27 @@ ValuableManager::~ValuableManager(){
 
 string ValuableManager::parseVal(string s){
     vector<string> ss;
-    string substr, res = s;
-    replace(s.begin(), s.end(), ',', ' ');
-    replace(s.begin(), s.end(), '(', ' ');
-    replace(s.begin(), s.end(), ')', ' ');
+    string substr, res;
+    if(s.empty())
+        return "";
+    if(s.find_first_of(',')!=string::npos)
+        s = regex_replace(s, regex(","), " , ");
+    if(s.find_first_of('(')!=string::npos){
+        s = regex_replace(s, regex("("), " ( ");
+        s = regex_replace(s, regex(")"), " ) ");
+    }
     do{
         s.erase(0, s.find_first_not_of(' '));
         substr = s.substr(0, s.find_first_of(' '));
         ss.push_back(substr);
         s.erase(0, s.find_first_of(' '));
     }while(s.find_first_not_of(' ') != string::npos);
-    for(auto str: ss)
+    for(int i = 0; i < ss.size(); i++)
         for(auto v: valuables)
-            if(v->name == str){
-                regex re("[,()\\s]?"+str+"[,()\\s]?");
-                res = regex_replace(res, re, to_string(v->addr));
-            }
+            if(v->name == ss[i])
+                ss[i] = to_string(v->addr);
+    for(auto str: ss)
+        res.append(str);
     return res;
 }
 
