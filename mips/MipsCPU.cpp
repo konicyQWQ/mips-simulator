@@ -16,7 +16,7 @@ MipsCPU::MipsCPU()
 int MipsCPU::readMemory()
 {
     ifstream in("binary_code.txt");
-    if(!in)
+    if (!in)
         return 1;
     string ins;
     int ofs = 0;
@@ -88,8 +88,68 @@ int MipsCPU::runNext()
             rgstr[rd] = rgstr[rs] >> sft;
         else if (fun == 8) //jr
             PC = rgstr[rs];
-        else if (fun == 12)
-            ; //TODO: syscall
+        else if (fun == 12) //syscall
+        {
+            int v0 = rgstr[2];
+            if (v0 == 1)
+            {
+                //print_int
+                int i = (int)rgstr[4];
+                string s = to_string(i);
+                for (int j = 0; j < s.length(); ++j)
+                    Memory[VMaddr + j] = s[j] - '0';
+            }
+            else if (v0 == 2)
+            {
+                //print_float
+                float f = (float)rgstr[4];
+                string s = to_string(f);
+                for (int j = 0; j < s.length(); ++j)
+                    Memory[VMaddr + j] = s[j] - '0';
+            }
+            else if (v0 == 3)
+            {
+                //print_double
+                dwrd d = rgstr[4];
+                d <<= 32;
+                d += rgstr[4];
+                string s = to_string((double)d);
+                for (int j = 0; j < s.length(); ++j)
+                    Memory[VMaddr + j] = s[j] - '0';
+            }
+            else if (v0 == 4)
+            {
+                //print_string
+                //$a0 is 32 bit which means it can only represent a string of length 4
+                //if we want to print a longer string, we need to invoke syscall repeatedly
+                for (int i = 3; i >= 0; --i)
+                    Memory[VMaddr + 3 - i] = (rgstr[4] >> (i * 8)) & 255;
+            }
+            else if (v0 == 5)
+            {
+                //read_int
+            }
+            else if (v0 == 6)
+            {
+                //read_float
+            }
+            else if (v0 == 7)
+            {
+                //read_double
+            }
+            else if (v0 == 10)
+                exit(0);
+            else if (v0 == 11)
+            {
+                //print_char
+                char c = (char)(rgstr[4] & 255);
+                Memory[VMaddr] = c;
+            }
+            else if (v0 == 12)
+            {
+                //read_char
+            }
+        }
     }
     else if (op == 8) //addi
         rgstr[rt] = rgstr[rs] + (dword)dat;
@@ -130,62 +190,6 @@ int MipsCPU::runNext()
     {
         rgstr[31] = PC; //$ra=PC
         PC = (PC & 0xF8000000) + adr;
-    }
-    else if (op == 12) //syscalls
-    {
-        int v0 = rgstr[2];
-        if (v0 == 1)
-        {
-            //print_int
-            int i = (int)rgstr[4];
-            string s = to_string(i);
-            for (int j = 0; j < s.length(); ++j)
-                Memory[VMaddr + j] = s[j] - '0';
-        }
-        else if (v0 == 2)
-        {
-            //print_float
-            float f = (float)rgstr[4];
-            string s = to_string(f);
-            for (int j = 0; j < s.length(); ++j)
-                Memory[VMaddr + j] = s[j] - '0';
-        }
-        else if (v0 == 3)
-        {
-            //print_double
-            dwrd d = rgstr[4];
-            d <<= 32;
-            d += rgstr[4];
-            string s = to_string((double)d);
-            for (int j = 0; j < s.length(); ++j)
-                Memory[VMaddr + j] = s[j] - '0';
-        }
-        else if (v0 == 4)
-        {
-            //print_string
-        }
-        else if (v0 == 5)
-        {
-            string str = mips::inputStringDialog("请输入整数", "一个整数");
-        }
-        else if (v0 == 6)
-        {
-            //read_float
-        }
-        else if (v0 == 7)
-        {
-            //read_double
-        }
-        else if (v0 == 10)
-            exit(0);
-        else if (v0 == 11)
-        {
-            //print_char
-        }
-        else if (v0 == 12)
-        {
-            //read_char
-        }
     }
 
     //输出显存内容
