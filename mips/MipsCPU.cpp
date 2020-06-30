@@ -107,7 +107,7 @@ int MipsCPU::runNext()
                 for (int j = 0; j < s.length(); ++j)
                     Memory[VMaddr + j] = s[j] - '0';
             }
-            else if (v0 == 3)
+           /* else if (v0 == 3)
             {
                 //print_double
                 dwrd d = rgstr[4];
@@ -116,7 +116,7 @@ int MipsCPU::runNext()
                 string s = to_string((double)d);
                 for (int j = 0; j < s.length(); ++j)
                     Memory[VMaddr + j] = s[j] - '0';
-            }
+            }*/
             else if (v0 == 4)
             {
                 //print_string
@@ -127,15 +127,30 @@ int MipsCPU::runNext()
             }
             else if (v0 == 5)
             {
-                //read_int
+                QString str = mips::inputStringDialog("请输入整数", "一个整数");
+                rgstr[2] = str.toInt();
             }
             else if (v0 == 6)
             {
-                //read_float
+                QString str = mips::inputStringDialog("请输入float浮点数", "一个浮点数");
+                float a = str.toFloat();
+                memcpy((char*)&rgstr[2], (char*)&a, 4);
             }
-            else if (v0 == 7)
+            /*else if (v0 == 7)
             {
-                //read_double
+                QString str = mips::inputStringDialog("请输入double浮点数", "一个浮点数");
+                double a = str.toDouble();
+                memcpy((char*)&rgstr[2], (char*)&a, 4);
+                memcpy(char)
+            }*/
+            else if(v0 == 8)
+            {
+                QString str = mips::inputStringDialog("请输入字符串", "一个字符串");
+                for(int i=0; i<rgstr[5]; i++)
+                    if(i < str.length())
+                        Memory[rgstr[4] + i] = str[i];
+                    else
+                        Memory[rgstr[4] + i] = 0;
             }
             else if (v0 == 10)
                 exit(0);
@@ -147,7 +162,8 @@ int MipsCPU::runNext()
             }
             else if (v0 == 12)
             {
-                //read_char
+                QString str = mips::inputStringDialog("请输入字符串", "一个字符串");
+                rgstr[4] = str[0];
             }
         }
     }

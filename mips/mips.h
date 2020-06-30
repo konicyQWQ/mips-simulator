@@ -27,7 +27,7 @@ public:
     // 显示内存
     void showMEM();
     // 打开一个输入框，提示用户输入
-    static string inputStringDialog(QString title, QString labels);
+    static QString inputStringDialog(QString title, QString labels);
 
 
 private slots:

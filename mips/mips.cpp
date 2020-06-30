@@ -343,12 +343,12 @@ void mips::on_memButton_clicked()
 }
 
 // ==================== 打开一个输入字符串的对话框 ===============
-string mips::inputStringDialog(QString title, QString label) {
+QString mips::inputStringDialog(QString title, QString label) {
     QLineEdit::EchoMode echomode = QLineEdit::Normal;
     bool ok = false;
     QString text = QInputDialog::getText(nullptr, title, label, echomode, "", &ok);
     if(ok && !text.isEmpty())
-        return text.toStdString();
+        return text;
     else
         return "0";
 }
