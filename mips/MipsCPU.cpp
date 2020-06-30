@@ -153,7 +153,7 @@ int MipsCPU::runNext()
                         Memory[rgstr[4] + i] = 0;
             }
             else if (v0 == 10)
-                exit(0);
+                return 1;
             else if (v0 == 11)
             {
                 //print_char

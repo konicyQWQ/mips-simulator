@@ -154,6 +154,8 @@ void mips::on_openFile_clicked()
 
 // ==============================编译代码==============================
 
+extern ValuableManager VM;
+
 void mips::on_compile_clicked()
 {
     ofstream binary_code("binary_code.txt", ios::trunc);
@@ -161,25 +163,35 @@ void mips::on_compile_clicked()
     Assemble a;
     string str = editor->toPlainText().toStdString() + '\n';
 
-    int pos1 = str.find(".data");
-    int pos2 = str.find(".text");
-    string variable = str.substr(pos1 + 5, pos2 - pos1 - 5);
-    string ins = str.substr(pos2 + 5);
-
-    qDebug() << QString::fromStdString(variable);
-    qDebug() << QString::fromStdString(ins);
-
     while (true)
     {
-        int pos = ins.find('\n');
+        int pos = str.find('\n');
         if(pos == string::npos) {
             break;
         }
-        string s = ins.substr(0, pos);
-        ins = ins.substr(pos+1);
+        string s = str.substr(0, pos);
+        str = str.substr(pos+1);
         a.addInstruction(s);
     }
+
     a.run();
+    vector<Valuable*> var = VM.getValuables();
+    for(int i=0; i<var.size(); i++){
+        Valuable *v = var[i];
+        if(v->type == 0) {
+            // string
+            for(int j=0; j<v->value_s.length(); j++)
+                cpu.modifyMemory(v->addr + j, v->value_s[j]);
+        } else {
+            // float
+            zjie buf[2];
+            memcpy((char*)&buf, (char*)&v->value_f, 4);
+            cpu.modifyMemory(v->addr, buf[0]);
+            cpu.modifyMemory(v->addr, buf[1]);
+        }
+    }
+
+
     ui->consoleOutput->appendPlainText("编译成功!");
     ui->tabArea->setCurrentIndex(0);
 }
@@ -256,6 +268,7 @@ void mips::on_runOneLine_clicked()
     if(errCode == 1) {
         // 运行结束
         this->debugMode = false;
+        ui->consoleOutput->appendPlainText("运行结束");
     }
     this->showREG();
     this->showMEM();
